@@ -19,6 +19,7 @@ from Experimental_root.data.utils_common import open_sequence, get_imagenames
 from Experimental_root.data.utils_common import normalize_augment
 from basicsr.utils.registry import DATASET_REGISTRY
 import os
+import json
 
 class VideoReaderPipeline(Pipeline):
     ''' Pipeline for reading H264 videos based on NVIDIA DALI.
@@ -215,6 +216,23 @@ class ValFolderDataset(Dataset):
                                  if os.path.isdir(pth)])
         self.base_folder = sorted([os.path.basename(pth) for pth in glob.glob(os.path.join(self.valsetdir, '*'))
                                  if os.path.isdir(pth)])
+        print("==========================================================================")
+        # print( json.dumps(self.opt, indent = 4) )
+        std_file = os.path.join(os.path.dirname(self.valsetdir),'val_std.txt')
+        
+        i = 0
+        with open(std_file) as f:
+            self.names = []
+            self.stds = []
+            for line in f:
+                i=i+1
+                if i<25:
+                    self.names.append(line.split('  ')[0])
+                    self.stds.append(line.split('  ')[1].split('\n')[0])
+        # for i in range(len(names)):
+        #     print(names[i])
+        #     print(stds[i])
+
         if self.scene_name is not None:
             self.seqs_dirs = [d for d in self.seqs_dirs if self.scene_name in d]
             self.base_folder = [d for d in self.base_folder if self.scene_name in d]
@@ -225,14 +243,26 @@ class ValFolderDataset(Dataset):
                     max_num_fr=self.num_input_frames)
         gt = torch.from_numpy(seq)[None, ...]
         N, F, C, H, W = gt.size()
+        print(gt.shape)
+        print(index)
+        name_dir = os.path.basename(self.seqs_dirs[index])
+        print(name_dir)
+        self.opt['valnoisestd'] = float(self.stds[self.names.index(name_dir)])
+        print(self.opt['valnoisestd'])
         
         
         # TODO gaussian noise generator can be merged with DAVIS daliloader
-        noise = torch.FloatTensor(gt.size()).normal_(mean=0, std=self.opt['valnoisestd']/255.0)
-        seqn_val = gt + noise
-        seqn_val = seqn_val.cuda()
-        sigma_noise = torch.cuda.FloatTensor([self.opt['valnoisestd']/255.0])
-        noise_map = sigma_noise.expand((N, F, 1, H, W)).cuda()
+        if not self.opt['noisy_input']:
+            noise = torch.FloatTensor(gt.size()).normal_(mean=0, std=self.opt['valnoisestd']/255.0)
+            seqn_val = gt + noise
+            seqn_val = seqn_val.cuda()
+            sigma_noise = torch.cuda.FloatTensor([self.opt['valnoisestd']/255.0])
+            noise_map = sigma_noise.expand((N, F, 1, H, W)).cuda()
+        else:
+            seqn_val = gt
+            seqn_val = seqn_val.cuda()
+            sigma_noise = torch.cuda.FloatTensor([self.opt['valnoisestd']/255.0])
+            noise_map = sigma_noise.expand((N, F, 1, H, W)).cuda()
 
         return_dict =  {
             'gt': gt, # shape 1, N, C, H, W
@@ -242,6 +272,7 @@ class ValFolderDataset(Dataset):
             "index": index
         }
         if self.opt.get('blind', False):
+            print("no noise map.")
             return_dict.pop('noise_map')
         return return_dict
 
