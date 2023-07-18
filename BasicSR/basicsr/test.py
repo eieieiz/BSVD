@@ -7,11 +7,13 @@ from basicsr.models import build_model
 from basicsr.utils import get_env_info, get_root_logger, get_time_str, make_exp_dirs
 from basicsr.utils.options import dict2str, parse_options
 
+import json
+
 
 def test_pipeline(root_path):
     # parse options, set distributed setting, set ramdom seed
     opt, _ = parse_options(root_path, is_train=False)
-
+    print( json.dumps(opt, indent = 4) )
     # torch.backends.cudnn.benchmark = True
     torch.backends.cudnn.deterministic = True
 
