@@ -88,6 +88,10 @@ def parse_options(root_path, is_train=True, cmd=None):
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument(
         '--force_yml', nargs='+', default=None, help='Force to update yml files. Examples: train:ema_decay=0.999')
+
+    parser.add_argument('--noisy_input', type=str, default='false')
+    parser.add_argument('--noiselevel', type=int, default=None, help='specify the noise level')
+
     args = parser.parse_args()
     if cmd is None:
         args = parser.parse_args()
@@ -97,6 +101,22 @@ def parse_options(root_path, is_train=True, cmd=None):
     # parse yml to dict
     with open(args.opt, mode='r') as f:
         opt = yaml.load(f, Loader=ordered_yaml()[0])
+
+    # for noisy input
+    if args.noisy_input.lower() == 'true':
+        args.noisy_input = True
+    elif args.noisy_input.lower() == 'false':
+        args.noisy_input = False
+    else:
+        raise Exception("The input shoule be either true or false.")
+    if args.noisy_input:
+        opt['datasets']['val_d1']['noisy_input'] = True
+        opt['val']['metrics'] = None
+    else:
+        opt['datasets']['val_d1']['noisy_input'] = False
+
+    if args.noiselevel:
+        opt['datasets']['val_d1']['valnoisestd'] = args.noiselevel
 
     # distributed settings
     if args.launcher == 'none':
@@ -173,7 +193,7 @@ def parse_options(root_path, is_train=True, cmd=None):
             opt['logger']['print_freq'] = 1
             opt['logger']['save_checkpoint_freq'] = 8
     else:  # test
-        results_root = osp.join(root_path, 'results', opt['name'])
+        results_root = osp.join(opt['path']['save_path'], 'results', opt['name'])
         opt['path']['results_root'] = results_root
         opt['path']['log'] = results_root
         opt['path']['visualization'] = osp.join(results_root, 'visualization')
