@@ -12,6 +12,8 @@ from basicsr.utils.registry import MODEL_REGISTRY
 from basicsr.models.base_model import BaseModel
 from Experimental_root.models.validation_seq_infer import denoise_seq
 
+import time
+
 @MODEL_REGISTRY.register()
 class DenoisingModel(BaseModel):
     """Base SR model for single image super-resolution."""
@@ -216,6 +218,7 @@ class DenoisingModel(BaseModel):
         dataset = dataloader.dataset
         dataset_name = dataset.opt['name']
         with_metrics = self.opt['val']['metrics'] is not None
+        print(with_metrics)
         # initialize self.metric_results
         # It is a dict: {
         #    'folder1': tensor (num_frame x len(metrics)),
@@ -255,7 +258,12 @@ class DenoisingModel(BaseModel):
             val_data['gt'].squeeze_(0)
             if 'noise_map' in val_data.keys():
                 val_data['noise_map'].squeeze_(0)
-            with torch.no_grad(): self.test()
+            with torch.no_grad(): 
+                starttime = time.time()
+                for i in range(1):
+                    self.test()
+                endtime = time.time()
+                print("Excute time (100 times):{}".format(endtime - starttime) )
             visuals = self.get_current_visuals()
 
             # tentative for out of GPU memory
@@ -273,16 +281,18 @@ class DenoisingModel(BaseModel):
 
             # evaluate
             if i < num_folders:
-                for idx in range(visuals['result'].size(1)):
+                for idx in range(visuals['result'].size(1)):                   
                     result = visuals['result'][0, idx, :, :, :]
                     result_img = tensor2img([result])  # uint8, bgr
-                    metric_data['img'] = result_img
-                    metric_data_float['img_float'] = result
+                    if with_metrics:
+                        metric_data['img'] = result_img
+                        metric_data_float['img_float'] = result
                     if 'gt' in visuals:
                         gt = visuals['gt'][0, idx, :, :, :]
                         gt_img = tensor2img([gt])  # uint8, bgr
-                        metric_data['img2'] = gt_img
-                        metric_data_float['img2_float'] = gt
+                        if with_metrics:
+                            metric_data['img2'] = gt_img
+                            metric_data_float['img2_float'] = gt
 
                     if save_img:
                         # if self.opt['is_train']:
@@ -310,7 +320,8 @@ class DenoisingModel(BaseModel):
                             self.metric_results[folder][idx, metric_idx] += result
                 pbar.update(1)
                 pbar.set_description(f'Test {folder}')
-            total_avg_results = self._log_validation_metric_values(current_iter, dataset_name, tb_logger)
+            if with_metrics:
+                total_avg_results = self._log_validation_metric_values(current_iter, dataset_name, tb_logger)
         pbar.close()
         # if rank == 0:
         return total_avg_results
