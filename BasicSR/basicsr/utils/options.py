@@ -91,6 +91,7 @@ def parse_options(root_path, is_train=True, cmd=None):
 
     parser.add_argument('--noisy_input', type=str, default='false')
     parser.add_argument('--noiselevel', type=int, default=None, help='specify the noise level')
+    parser.add_argument('--read_std', type=str, default='false', help='read noise level from a file.')
 
     args = parser.parse_args()
     if cmd is None:
@@ -109,6 +110,14 @@ def parse_options(root_path, is_train=True, cmd=None):
         args.noisy_input = False
     else:
         raise Exception("The input shoule be either true or false.")
+
+    if args.read_std.lower() == 'true':
+        args.read_std = True
+        opt['datasets']['val_d1']['read_std'] = True
+    elif args.read_std.lower() == 'false':
+        args.read_std = False
+        opt['datasets']['val_d1']['read_std'] = False
+    
     if args.noisy_input:
         opt['datasets']['val_d1']['noisy_input'] = True
         opt['val']['metrics'] = None

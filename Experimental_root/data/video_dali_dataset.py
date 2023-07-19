@@ -218,17 +218,19 @@ class ValFolderDataset(Dataset):
                                  if os.path.isdir(pth)])
         print("==========================================================================")
         # print( json.dumps(self.opt, indent = 4) )
-        std_file = os.path.join(os.path.dirname(self.valsetdir),'val_std.txt')
-        
-        i = 0
-        with open(std_file) as f:
-            self.names = []
-            self.stds = []
-            for line in f:
-                i=i+1
-                if i<25:
-                    self.names.append(line.split('  ')[0])
-                    self.stds.append(line.split('  ')[1].split('\n')[0])
+        if self.opt['noisy_input'] and self.opt['read_std']:
+            std_file = os.path.join(os.path.dirname(self.valsetdir),'val_std.txt')
+            print(std_file)
+            i = 0
+            with open(std_file) as f:
+                self.names = []
+                self.stds = []
+                for line in f:
+                    i=i+1
+                    print(i)
+                    if i<25:
+                        self.names.append(line.split('  ')[0])
+                        self.stds.append(line.split('  ')[1].split('\n')[0])
         # for i in range(len(names)):
         #     print(names[i])
         #     print(stds[i])
@@ -243,12 +245,10 @@ class ValFolderDataset(Dataset):
                     max_num_fr=self.num_input_frames)
         gt = torch.from_numpy(seq)[None, ...]
         N, F, C, H, W = gt.size()
-        print(gt.shape)
-        print(index)
-        name_dir = os.path.basename(self.seqs_dirs[index])
-        print(name_dir)
-        self.opt['valnoisestd'] = float(self.stds[self.names.index(name_dir)])
-        print(self.opt['valnoisestd'])
+        if self.opt['noisy_input'] and self.opt['read_std']:
+            name_dir = os.path.basename(self.seqs_dirs[index])
+            self.opt['valnoisestd'] = float(self.stds[self.names.index(name_dir)])
+            print(self.opt['valnoisestd'])
         
         
         # TODO gaussian noise generator can be merged with DAVIS daliloader
