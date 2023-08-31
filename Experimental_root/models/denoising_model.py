@@ -12,6 +12,8 @@ from basicsr.utils.registry import MODEL_REGISTRY
 from basicsr.models.base_model import BaseModel
 from Experimental_root.models.validation_seq_infer import denoise_seq
 
+import time
+
 @MODEL_REGISTRY.register()
 class DenoisingModel(BaseModel):
     """Base SR model for single image super-resolution."""
@@ -255,7 +257,10 @@ class DenoisingModel(BaseModel):
             val_data['gt'].squeeze_(0)
             if 'noise_map' in val_data.keys():
                 val_data['noise_map'].squeeze_(0)
-            with torch.no_grad(): self.test()
+            with torch.no_grad(): 
+                starttime=time.time()
+                self.test()
+                print(time.time() - starttime)
             visuals = self.get_current_visuals()
 
             # tentative for out of GPU memory
