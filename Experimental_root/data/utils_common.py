@@ -17,11 +17,12 @@ from random import choices # requires Python >= 3.6
 import numpy as np
 import cv2
 import torch
+import iio
 
 
 
 
-IMAGETYPES = ('*.bmp', '*.png', '*.jpg', '*.jpeg', '*.tif') # Supported image types
+IMAGETYPES = ('*.bmp', '*.png', '*.jpg', '*.jpeg', '*.tif', '*.tiff') # Supported image types
 
 
 # def normalize_augment(datain, ctrl_fr_idx): 
@@ -142,9 +143,11 @@ def open_image(fpath, gray_mode, expand_if_needed=False, expand_axis0=True, norm
     """
     if not gray_mode:
         # Open image as a CxHxW torch.Tensor
-        img = cv2.imread(fpath)
+        # img = cv2.imread(fpath)
+        img = iio.read(fpath)
         # from HxWxC to CxHxW, RGB image
-        img = (cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).transpose(2, 0, 1)
+        # img = (cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).transpose(2, 0, 1)
+        img = img.transpose(2,0,1)
     else:
         # from HxWxC to  CxHxW grayscale image (C=1)
         img = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
