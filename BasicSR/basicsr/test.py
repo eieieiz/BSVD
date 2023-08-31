@@ -6,7 +6,7 @@ from basicsr.data import build_dataloader, build_dataset
 from basicsr.models import build_model
 from basicsr.utils import get_env_info, get_root_logger, get_time_str, make_exp_dirs
 from basicsr.utils.options import dict2str, parse_options
-
+import time
 
 def test_pipeline(root_path):
     # parse options, set distributed setting, set ramdom seed
@@ -37,7 +37,12 @@ def test_pipeline(root_path):
     for test_loader in test_loaders:
         test_set_name = test_loader.dataset.opt['name']
         logger.info(f'Testing {test_set_name}...')
-        model.validation(test_loader, current_iter=opt['name'], tb_logger=None, save_img=opt['val']['save_img'])
+        print("="*25)
+        print("test")
+        # model.validation(test_loader, current_iter=opt['name'], tb_logger=None, save_img=opt['val']['save_img'])
+        starttime=time.time()
+        model.validation(test_loader, current_iter=opt['name'], tb_logger=None, save_img=True)
+        print(time.time() - starttime)
 
 
 if __name__ == '__main__':
