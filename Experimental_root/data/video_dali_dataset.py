@@ -229,7 +229,8 @@ class ValFolderDataset(Dataset):
         
         # TODO gaussian noise generator can be merged with DAVIS daliloader
         noise = torch.FloatTensor(gt.size()).normal_(mean=0, std=self.opt['valnoisestd']/255.0)
-        seqn_val = gt + noise
+        # seqn_val = gt + noise
+        seqn_val = gt
         seqn_val = seqn_val.cuda()
         sigma_noise = torch.cuda.FloatTensor([self.opt['valnoisestd']/255.0])
         noise_map = sigma_noise.expand((N, F, 1, H, W)).cuda()
