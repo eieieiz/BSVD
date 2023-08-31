@@ -173,7 +173,7 @@ def parse_options(root_path, is_train=True, cmd=None):
             opt['logger']['print_freq'] = 1
             opt['logger']['save_checkpoint_freq'] = 8
     else:  # test
-        results_root = osp.join(root_path, 'results', opt['name'])
+        results_root = osp.join(opt['path']['save_path'], 'results', opt['name'])
         opt['path']['results_root'] = results_root
         opt['path']['log'] = results_root
         opt['path']['visualization'] = osp.join(results_root, 'visualization')
