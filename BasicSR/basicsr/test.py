@@ -8,6 +8,7 @@ from basicsr.utils import get_env_info, get_root_logger, get_time_str, make_exp_
 from basicsr.utils.options import dict2str, parse_options
 
 import json
+import time
 
 
 def test_pipeline(root_path):
