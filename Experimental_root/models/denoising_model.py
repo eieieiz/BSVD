@@ -324,7 +324,8 @@ class DenoisingModel(BaseModel):
                 total_avg_results = self._log_validation_metric_values(current_iter, dataset_name, tb_logger)
         pbar.close()
         # if rank == 0:
-        return total_avg_results
+        if with_metrics:
+            return total_avg_results
 
     def _log_validation_metric_values(self, current_iter, dataset_name, tb_logger):
         
