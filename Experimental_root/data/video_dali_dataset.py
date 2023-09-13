@@ -227,7 +227,7 @@ class ValFolderDataset(Dataset):
                 self.stds = []
                 for line in f:
                     i=i+1
-                    print(i)
+                    # print(i)
                     if i<25:
                         self.names.append(line.split('  ')[0])
                         self.stds.append(line.split('  ')[1].split('\n')[0])
@@ -245,10 +245,12 @@ class ValFolderDataset(Dataset):
                     max_num_fr=self.num_input_frames)
         gt = torch.from_numpy(seq)[None, ...]
         N, F, C, H, W = gt.size()
+        # read std, and assign it as noise map
+        # otherwise, use the input noise level.
         if self.opt['noisy_input'] and self.opt['read_std']:
             name_dir = os.path.basename(self.seqs_dirs[index])
             self.opt['valnoisestd'] = float(self.stds[self.names.index(name_dir)])
-            print(self.opt['valnoisestd'])
+        print(self.opt['valnoisestd'])
         
         
         # TODO gaussian noise generator can be merged with DAVIS daliloader
