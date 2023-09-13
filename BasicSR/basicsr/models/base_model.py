@@ -15,7 +15,11 @@ class BaseModel():
 
     def __init__(self, opt):
         self.opt = opt
-        self.device = torch.device('cuda' if opt['num_gpu'] != 0 else 'cpu')
+        if opt['gpu_ids'] == '-1':
+            self.device = 'cpu'
+        else:
+            os.environ['CUDA_VISIBLE_DEVICES'] = opt['gpu_ids']
+            self.device = torch.device('cuda')
         self.is_train = opt['is_train']
         self.schedulers = []
         self.optimizers = []

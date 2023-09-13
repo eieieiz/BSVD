@@ -88,6 +88,11 @@ def parse_options(root_path, is_train=True, cmd=None):
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument(
         '--force_yml', nargs='+', default=None, help='Force to update yml files. Examples: train:ema_decay=0.999')
+
+    # parser.add_argument('--noisy_input', type=str, default='false')
+    # parser.add_argument('--noiselevel', type=int, default=None, help='specify the noise level')
+    # parser.add_argument('--read_std', type=str, default='false', help='read noise level from a file.')
+
     args = parser.parse_args()
     if cmd is None:
         args = parser.parse_args()
@@ -97,6 +102,30 @@ def parse_options(root_path, is_train=True, cmd=None):
     # parse yml to dict
     with open(args.opt, mode='r') as f:
         opt = yaml.load(f, Loader=ordered_yaml()[0])
+
+    # for noisy input
+    # if args.noisy_input.lower() == 'true':
+    #     args.noisy_input = True
+    # elif args.noisy_input.lower() == 'false':
+    #     args.noisy_input = False
+    # else:
+    #     raise Exception("The input shoule be either true or false.")
+
+    # if args.read_std.lower() == 'true':
+    #     args.read_std = True
+    #     opt['datasets']['val_d1']['read_std'] = True
+    # elif args.read_std.lower() == 'false':
+    #     args.read_std = False
+    #     opt['datasets']['val_d1']['read_std'] = False
+    
+    # if args.noisy_input:
+    #     opt['datasets']['val_d1']['noisy_input'] = True
+    #     opt['val']['metrics'] = None
+    # else:
+    #     opt['datasets']['val_d1']['noisy_input'] = False
+
+    # if args.noiselevel:
+    #     opt['datasets']['val_d1']['valnoisestd'] = args.noiselevel
 
     # distributed settings
     if args.launcher == 'none':
