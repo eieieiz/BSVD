@@ -90,7 +90,7 @@ def parse_options(root_path, is_train=True, cmd=None):
         '--force_yml', nargs='+', default=None, help='Force to update yml files. Examples: train:ema_decay=0.999')
 
     # parser.add_argument('--noisy_input', type=str, default='false')
-    parser.add_argument('--noiselevel', type=int, default=None, help='specify the noise level')
+    # parser.add_argument('--noiselevel', type=int, default=None, help='specify the noise level')
     # parser.add_argument('--read_std', type=str, default='false', help='read noise level from a file.')
 
     args = parser.parse_args()
